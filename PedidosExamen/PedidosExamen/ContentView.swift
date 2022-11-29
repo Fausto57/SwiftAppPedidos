@@ -9,78 +9,94 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
-
-    private var items: FetchedResults<Item>
+    let coreDM : CoreDataManager
+    @State var Nombre: String = ""
+    @State var Articulo: String = ""
+    @State var Dirección: String = ""
+    @State var Estatus: String = ""
+    @State var Fecha: String = ""
+    @State var Total: String = ""
+    @State var seleccionado:Pedido?
+    @State var traeTodos=[Pedido]()
 
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+        VStack{
+            TextField("Ingrese Su Nombre", text: $Nombre)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Ingrese Nombre Articulo", text: $Articulo)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Ingrese Dirección", text: $Dirección)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Ingrese Estatus de Articulo", text: $Estatus)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Ingrese Fecha", text: $Fecha)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Ingrese Total", text: $Total)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
+            Button("Guardar"){
+                if(seleccionado != nil){
+                    seleccionado?.nombre = Nombre
+                    seleccionado?.articulo = Articulo
+                    seleccionado?.dirección = Dirección
+                    seleccionado?.estatus = Estatus
+                    seleccionado?.fecha = Fecha
+                    seleccionado?.total = Total
+                    CoreDM.ActualizaPedido(Pedido: seleccionado!)
+                }else{
+                    CoreDM.GuardarPedido(nombre: String, articulo: String, dirección: String, estatus: String, fecha: String, total: String)
+                }
+                MPedidos()
+                Nombre = ""
+                Articulo = ""
+                Dirección = ""
+                Estatus = ""
+                Fecha = ""
+                Total = ""
+                seleccionado=nil
+            }
+            List{
+                ForEach(traeTodos, nombre: \.self){
+                    ped in
+                    VStack{
+                        Text(ped.nombre ?? "")
+                        Text(ped.Articulo ?? "")
+                        Text(ped.Dirección ?? "")
+                        Text(ped.Estatus ?? "")
+                        Text(ped.Fecha ?? "")
+                        Text(ped.Total ?? "")
+                    }.onTapGesture{
+                        seleccionado=ped
+                        Nombre=ped.nombre ?? ""
+                        Articulo=ped.articulo ?? ""
+                        Dirección=ped.dirección ?? ""
+                        Estatus=ped.estatus ?? ""
+                        Fecha=ped.fecha ?? ""
+                        Total=ped.total ?? ""
                     }
                 }
-                .onDelete(perform: deleteItems)
+                .onDelete(perform: {
+                    indexSet in
+                    indexSet.forEach({index in let pedido=traeTodos[index]
+                        CoreDM.EliminarPedido(pedido: pedido)
+                        MPedidos()
+                    })
+                })
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-            Text("Select an item")
-        }
-    }
-/*
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+            Spacer()
+        }.padding()
+            .onAppear(perform:{
+                MPedidos()
+            })
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+    func MPedidos(){
+        traeTodos=CoreDM.leerTodos()
     }
-    */
 }
-
-
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        ContentView(CoreDM: CoreDataManager())
     }
 }

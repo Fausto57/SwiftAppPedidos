@@ -13,14 +13,14 @@ class CoreDataManager {
             }
     })
 
-    func Guardar(nombre: String, articulo: String, dirección: String, estatus: String, fecha: String, total: String){
-        let Pedido = Pedido(context: persistenContainer.viewContext)
-        Pedido.nombre = nombre
-        Pedido.articulo = articulo
-        Pedido.dirección = dirección
-        Pedido.estatus = estatus
-        Pedido.fecha = fecha
-        Pedido.total = total
+    func GuardarPedido(nombre: String, articulo: String, dirección: String, estatus: String, fecha: String, total: String){
+        let pedido = Pedido(context: persistenContainer.viewContext)
+        pedido.nombre = nombre
+        pedido.articulo = articulo
+        pedido.dirección = dirección
+        pedido.estatus = estatus
+        pedido.fecha = fecha
+        pedido.total = total
 
         do{
             try persistenContainer.viewContext.save()
@@ -32,10 +32,10 @@ class CoreDataManager {
     }
 
     func leerTodos() -> [Pedido] {
-        let result : NSFetchRequest<Pedido> = Pedido.FetchRequest()
+        let request: NSFetchRequest<Pedido> = Pedido.FetchRequest()
 
         do{
-            return try persistenContainer.viewContext.fetch(result)
+            return try persistenContainer.viewContext.fetch(request)
         } catch {
             result []
         }
@@ -53,20 +53,20 @@ class CoreDataManager {
 
     }
 
-    func ActualizarPedido() {
+    func ActualizaPedido(pedido: Pedido) {
         let fetchRequest = NSFetchRequest<Pedido> = Pedido.fetchRequest()
-        let predicate = NSPredicate(format:"Nombre = %@", Pedido.Nombre ?? "")
+        let predicate = NSPredicate(format:"Nombre = %@", pedido.Nombre ?? "")
         fetchRequest.predicate = predicate
 
         do{
             let datos = try persistenContainer.viewContext.fetch(fetchRequest)
             let p = datos.first
-            p?.nombre = Pedido.nombre
-            p?.articulo = Pedido.articulo
-            p?.dirección = Pedido.dirección
-            p?.estatus = Pedido.estatus
-            p?.fecha = Pedido.fecha
-            p?.total = Pedido.total
+            p?.nombre = pedido.nombre
+            p?.articulo = pedido.articulo
+            p?.dirección = pedido.dirección
+            p?.estatus = pedido.estatus
+            p?.fecha = pedido.fecha
+            p?.total = pedido.total
 
             try persistenContainer.viewContext.save()
             print("Producto Actualizado")
@@ -75,7 +75,7 @@ class CoreDataManager {
         }
     }
 
-    func leerUno(pedido: String) -> Producto?{
+    func leerUno(nombre: String) -> Pedido?{
         let fetchRequest = NSFetchRequest<Pedido> = Pedido.fetchRequest()
         let predicate = NSPredicate(format:"Nombre = %@", nombre)
         fetchRequest.predicate = predicate

@@ -14,7 +14,6 @@ struct PedidosExamenApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(CoreData: NSCoreDataManager())
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
 }
