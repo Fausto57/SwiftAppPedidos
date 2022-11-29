@@ -37,7 +37,7 @@ struct ContentView: View {
             Text("Select an item")
         }
     }
-
+/*
     private func addItem() {
         withAnimation {
             let newItem = Item(context: viewContext)
@@ -68,7 +68,9 @@ struct ContentView: View {
             }
         }
     }
+    */
 }
+
 
 private let itemFormatter: DateFormatter = {
     let formatter = DateFormatter()
