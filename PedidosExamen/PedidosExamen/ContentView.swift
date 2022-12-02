@@ -9,94 +9,80 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
-    let coreDM : CoreDataManager
-    @State var Nombre: String = ""
-    @State var Articulo: String = ""
-    @State var Dirección: String = ""
-    @State var Estatus: String = ""
-    @State var Fecha: String = ""
-    @State var Total: String = ""
-    @State var seleccionado:Pedido?
-    @State var traeTodos=[Pedido]()
-
+    let CoreDM: CoreDataManager
+    @State var id=""
+    @State var cliente=""
+    @State var articulo=""
+    @State var total=""
+    @State var estado=""
+    @State var seleccionado: Pedido?
+    @State var pedArray=[Pedido]()
+    
     var body: some View {
         VStack{
-            TextField("Ingrese Su Nombre", text: $Nombre)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            TextField("Ingrese Nombre Articulo", text: $Articulo)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            TextField("Ingrese Dirección", text: $Dirección)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            TextField("Ingrese Estatus de Articulo", text: $Estatus)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            TextField("Ingrese Fecha", text: $Fecha)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            TextField("Ingrese Total", text: $Total)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            Button("Guardar"){
+            TextField("Id", text: $id).textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Cliente", text: $cliente).textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Articulo", text: $articulo).textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Total", text: $total).textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Estado", text: $estado).textFieldStyle(RoundedBorderTextFieldStyle())
+            Button("Save"){
                 if(seleccionado != nil){
-                    seleccionado?.nombre = Nombre
-                    seleccionado?.articulo = Articulo
-                    seleccionado?.dirección = Dirección
-                    seleccionado?.estatus = Estatus
-                    seleccionado?.fecha = Fecha
-                    seleccionado?.total = Total
-                    CoreDM.ActualizaPedido(Pedido: seleccionado!)
+                    seleccionado?.id=id
+                    seleccionado?.articulo=articulo
+                    seleccionado?.cliente=cliente
+                    seleccionado?.estado=estado
+                    seleccionado?.total=total
+                    CoreDM.actualizaraPedido(pedido: seleccionado!)
                 }else{
-                    CoreDM.GuardarPedido(nombre: String, articulo: String, dirección: String, estatus: String, fecha: String, total: String)
+                    CoreDM.guardarPedido(id: id, cliente: cliente, articulo: articulo, total: total, estado: estado)
                 }
-                MPedidos()
-                Nombre = ""
-                Articulo = ""
-                Dirección = ""
-                Estatus = ""
-                Fecha = ""
-                Total = ""
+                mostrarPedidos()
+                id=""
+                cliente=""
+                articulo=""
+                total=""
+                estado=""
                 seleccionado=nil
             }
             List{
-                ForEach(traeTodos, nombre: \.self){
+                ForEach(pedArray,id: \.self){
                     ped in
                     VStack{
-                        Text(ped.nombre ?? "")
-                        Text(ped.Articulo ?? "")
-                        Text(ped.Dirección ?? "")
-                        Text(ped.Estatus ?? "")
-                        Text(ped.Fecha ?? "")
-                        Text(ped.Total ?? "")
+                        Text(ped.id ?? "")
+                        Text(ped.cliente ?? "")
+                        Text(ped.articulo ?? "")
+                        Text(ped.total ?? "")
+                        Text(ped.estado ?? "")
                     }.onTapGesture{
                         seleccionado=ped
-                        Nombre=ped.nombre ?? ""
-                        Articulo=ped.articulo ?? ""
-                        Dirección=ped.dirección ?? ""
-                        Estatus=ped.estatus ?? ""
-                        Fecha=ped.fecha ?? ""
-                        Total=ped.total ?? ""
+                        id=ped.id ?? ""
+                        articulo=ped.articulo ?? ""
+                        cliente=ped.cliente ?? ""
+                        estado=ped.estado ?? ""
+                        total=ped.total ?? ""
                     }
                 }
                 .onDelete(perform: {
                     indexSet in
-                    indexSet.forEach({index in let pedido=traeTodos[index]
-                        CoreDM.EliminarPedido(pedido: pedido)
-                        MPedidos()
+                    indexSet.forEach({index in let pedido=pedArray[index]
+                        CoreDM.borrarPedido(pedido: pedido)
+                        mostrarPedidos()
                     })
                 })
             }
             Spacer()
         }.padding()
             .onAppear(perform:{
-                MPedidos()
+                        mostrarPedidos()
             })
     }
-
-    func MPedidos(){
-        traeTodos=CoreDM.leerTodos()
+    func mostrarPedidos(){
+        pedArray=CoreDM.leerTodosLosPedidos()
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(CoreDM: CoreDataManager())
+        ContentView(CoreDM:CoreDataManager())
     }
 }
